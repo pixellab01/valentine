@@ -1,0 +1,690 @@
+:root {
+    --primary-color: #ff4d6d;
+    --secondary-color: #ff8fa3;
+    --bg-color: #fff0f3;
+    --text-color: #590d22;
+    --card-bg: rgba(255, 255, 255, 0.8);
+    --font-main: 'Outfit', sans-serif;
+    --font-script: 'Dancing Script', cursive;
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    background-image: radial-gradient(#ffccd5 1px, transparent 1px);
+    background-size: 20px 20px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#app {
+    width: 100%;
+    max-width: 800px;
+    padding: 20px;
+}
+
+/* Common Styles */
+.container {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(255, 77, 109, 0.15);
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+h1 {
+    font-family: var(--font-script);
+    font-size: 3.5rem;
+    color: var(--primary-color);
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-main);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(255, 77, 109, 0.3);
+}
+
+.btn:hover {
+    background: #ff2a51;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 77, 109, 0.4);
+}
+
+.input-group {
+    margin-bottom: 25px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+input[type="text"],
+input[type="url"],
+input[type="password"],
+input[type="email"] {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--secondary-color);
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+    background: white;
+}
+
+input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.1);
+}
+
+/* Image Grid Upload */
+.image-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.image-slot {
+    aspect-ratio: 1;
+    background: #fff;
+    border: 2px dashed var(--secondary-color);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition);
+}
+
+.image-slot:hover {
+    border-color: var(--primary-color);
+    background: #fff5f7;
+}
+
+.image-slot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.image-slot input {
+    display: none;
+}
+
+.placeholder {
+    color: var(--secondary-color);
+    font-size: 2rem;
+    font-weight: 300;
+}
+
+/* Valentine Viewer */
+.viewer-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.gallery-item {
+    aspect-ratio: 1;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeIn 0.8s ease-out;
+    border: 4px solid white;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.gallery-item:hover img {
+    transform: scale(1.05);
+}
+
+.video-container {
+    margin-top: 30px;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border: 4px solid white;
+}
+
+iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    display: block;
+}
+
+.error-page h1 {
+    font-size: 5rem;
+    margin-bottom: 10px;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (min-width: 600px) {
+    .image-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .gallery {
+        grid-template-columns: repeat(2, 1fr);
+        /* Keep 2x3 as requested or 2 cols x 3 rows */
+    }
+
+    /* Request says 2x3 Grid Layout -> 2 columns, 3 rows usually. Or 3x2. 
+       Let's stick to 2 columns for "sweet memories" usually looks good vertical.
+    */
+}
+
+/* Login Page Specifics */
+.login-container {
+    max-width: 500px;
+    padding: 60px 40px;
+    animation: fadeIn 1s ease-out;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    font-weight: 300;
+}
+
+.auth-box {
+    margin-top: 20px;
+}
+
+.auth-switch {
+    margin-top: 20px;
+    font-size: 0.9rem;
+}
+
+.auth-switch a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.auth-switch a:hover {
+    text-decoration: underline;
+}
+
+#login-btn {
+    font-size: 1.3rem;
+    padding: 15px 50px;
+    background: linear-gradient(45deg, var(--primary-color), #ff0a54);
+    width: 100%;
+}
+
+#login-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 10px 25px rgba(255, 10, 84, 0.4);
+}
+
+
+/* --- Valentine Template Styles --- */
+/* Scoped to .valentine-theme class on body or .valentine-wrapper */
+
+body.valentine-theme {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f7ebe1;
+    /* Elegant Beige */
+    color: #4a0e1c;
+    background-image: none;
+    /* Override previous grid */
+    overflow-y: constant;
+    overflow-x: hidden;
+}
+
+body.valentine-theme ::-webkit-scrollbar {
+    width: 6px;
+}
+
+body.valentine-theme ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+body.valentine-theme ::-webkit-scrollbar-thumb {
+    background: #ff4d6d;
+    border-radius: 10px;
+}
+
+.valentine-wrapper {
+    width: 100%;
+}
+
+/* Fireworks Canvas (Slide 2 only) */
+#fireworksCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    display: none;
+    background: transparent;
+}
+
+/* Petal Layer */
+.bg-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.petal {
+    position: absolute;
+    background: #ff4d6d;
+    border-radius: 150% 0 150% 0;
+    opacity: 0.6;
+    animation: fall linear forwards;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Main Pink Container */
+.valentine-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 90vh;
+    background: #ffcad4;
+    /* Romantic Pink */
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 40px;
+    padding: 40px;
+    text-align: center;
+    position: relative;
+    overflow-y: auto;
+    z-index: 10;
+    box-shadow: 0 20px 50px rgba(74, 14, 28, 0.15);
+    display: block;
+    margin: 0 auto;
+}
+
+.valentine-page {
+    display: none;
+    width: 100%;
+}
+
+/* Centering Fixes */
+.valentine-page.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100%;
+    padding-top: 20px;
+    padding-bottom: 50px;
+    animation: valFadeIn 0.8s ease;
+}
+
+#page1.active,
+#pageFinal.active,
+#pageProposeDay.popup-active {
+    justify-content: center;
+    padding-top: 0;
+}
+
+.popup-active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100%;
+    animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes valFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.valentine-container h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: #4a0e1c;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    text-shadow: none;
+}
+
+.romantic-text {
+    font-size: 1.2rem;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 750px;
+    margin-bottom: 2rem;
+    color: #6d1a2d;
+    padding-top: 10px;
+}
+
+.main-gif {
+    width: 250px;
+    height: 250px;
+    border-radius: 40px;
+    margin-bottom: 2rem;
+    object-fit: cover;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+/* --- BUTTONS --- */
+.btn-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    min-height: 140px;
+    position: relative;
+    width: 100%;
+}
+
+.val-btn {
+    padding: 18px 50px;
+    border-radius: 100px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-family: 'Montserrat', sans-serif;
+}
+
+#yesBtn {
+    background: red;
+    color: white;
+    z-index: 100;
+    position: relative;
+}
+
+#noBtn {
+    background: blue;
+    color: white;
+    z-index: 10;
+}
+
+/* --- DASHBOARD GIF CARDS --- */
+.selection-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.col-card {
+    background: rgba(255, 255, 255, 0.4);
+    padding: 40px 20px;
+    border-radius: 35px;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.col-card:hover {
+    background: white;
+    transform: translateY(-10px);
+    border-color: #ff4d6d;
+}
+
+.gif-icon {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+    border-radius: 20px;
+}
+
+.col-card h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    color: #4a0e1c;
+}
+
+/* --- GALLERY: 16:9 & HOVER --- */
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    width: 100%;
+    padding: 20px 0 50px 0;
+}
+
+.polaroid {
+    background: beige;
+    padding: 15px 15px 40px 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    transform: rotate(var(--r));
+    transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.polaroid:hover {
+    transform: rotate(0deg) scale(1.05);
+    z-index: 25;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.polaroid img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 1px solid #f9f9f9;
+}
+
+.photo-caption {
+    font-family: 'Roboto', cursive;
+    color: #222;
+    font-size: 1.8rem;
+}
+
+/* --- QUIZ --- */
+.quiz-container {
+    width: 100%;
+    max-width: 600px;
+    background: rgba(255, 255, 255, 0.3);
+    padding: 30px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.quiz-question {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #4a0e1c;
+    font-family: 'Playfair Display', serif;
+}
+
+.quiz-option {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: white;
+    color: #4a0e1c;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.quiz-option:hover {
+    background: #ff4d6d;
+    color: white;
+}
+
+#quiz-feedback {
+    margin-top: 15px;
+    font-weight: 600;
+    color: #ff4d6d;
+    min-height: 24px;
+}
+
+/* Letter */
+.letter-paper {
+    background: beige;
+    color: #222;
+    padding: 50px;
+    border-radius: 5px;
+    font-family: 'Roboto', cursive;
+    font-size: 1.2rem;
+    text-align: left;
+    max-width: 700px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn {
+    margin-top: 30px;
+    background: red;
+    color: white;
+    padding: 18px 50px;
+    border-radius: 100px;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.heart-burst {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: #ff4d6d;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+    pointer-events: none;
+    display: none;
+}
+
+@media (max-width: 1024px) {
+    .selection-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .valentine-container {
+        height: 92vh;
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .gallery-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .polaroid {
+        transform: rotate(0deg) !important;
+        padding-bottom: 25px;
+    }
+
+    .valentine-container h1 {
+        font-size: 2rem;
+    }
+}
