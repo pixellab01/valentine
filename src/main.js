@@ -1,7 +1,7 @@
 import './style.css';
 
 const app = document.getElementById('app');
-const API_BASE = 'http://localhost:3000/api/pages';
+const API_BASE = 'http://localhost:3005/api/pages';
 
 // Router Logic
 function handleRoute() {
@@ -84,7 +84,7 @@ function renderLoginPage() {
         actionBtn.textContent = 'Processing...';
 
         try {
-            const res = await fetch(`http://localhost:3000/api/login`, {
+            const res = await fetch(`http://localhost:3005/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -239,7 +239,7 @@ async function renderValentinePage(slug) {
 
         const galleryHtml = data.images.map((img, i) => `
             <div class="polaroid" style="--r:${rotations[i % rotations.length]}">
-                <img src="http://localhost:3000${img}" alt="Memory ${i + 1}">
+                <img src="http://localhost:3005${img}" alt="Memory ${i + 1}">
                 <p class="photo-caption">${captions[i] || 'Love'}</p>
             </div>
         `).join('');
