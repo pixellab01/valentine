@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "server": "nodemon server.js",
     "build": "vite build",
+    "server": "node server.js",
+    "server:dev": "nodemon server.js",
     "preview": "vite preview"
   },
   "devDependencies": {
