@@ -63,5 +63,18 @@
       "/uploads/test2123-1770207876874-267385547.jpg"
     ],
     "createdAt": "2026-02-04T12:24:36.877Z"
+  },
+  "tul": {
+    "slug": "tul",
+    "youtubeUrl": "https://www.youtube.com/watch?v=472GGh5D_h8",
+    "images": [
+      "/uploads/tul-1770281535244-375563790.jpg",
+      "/uploads/tul-1770281535364-902444177.png",
+      "/uploads/tul-1770281535607-537013550.jpg",
+      "/uploads/tul-1770281535627-40492266.jpg",
+      "/uploads/tul-1770281535634-872085282.png",
+      "/uploads/tul-1770281535924-706171916.png"
+    ],
+    "createdAt": "2026-02-05T08:52:15.993Z"
   }
 }

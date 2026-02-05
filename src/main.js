@@ -1,7 +1,7 @@
 import './style.css';
 
 const app = document.getElementById('app');
-const API_BASE = 'http://localhost:3005/api/pages';
+const API_BASE_URL = '';
 
 // Router Logic
 function handleRoute() {
@@ -84,7 +84,7 @@ function renderLoginPage() {
         actionBtn.textContent = 'Processing...';
 
         try {
-            const res = await fetch(`http://localhost:3005/api/login`, {
+            const res = await fetch(`${API_BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -197,7 +197,7 @@ function renderCreatePage() {
         });
 
         try {
-            const res = await fetch(API_BASE, {
+            const res = await fetch(`${API_BASE_URL}/api/pages`, {
                 method: 'POST',
                 body: formData
             });
@@ -226,7 +226,7 @@ async function renderValentinePage(slug) {
     document.body.classList.add('valentine-theme');
 
     try {
-        const res = await fetch(`${API_BASE}/${slug}`);
+        const res = await fetch(`${API_BASE_URL}/api/pages/${slug}`);
         if (!res.ok) {
             throw new Error('Page not found');
         }
@@ -239,7 +239,7 @@ async function renderValentinePage(slug) {
 
         const galleryHtml = data.images.map((img, i) => `
             <div class="polaroid" style="--r:${rotations[i % rotations.length]}">
-                <img src="http://localhost:3005${img}" alt="Memory ${i + 1}">
+                <img src="${API_BASE_URL}${img}" alt="Memory ${i + 1}">
                 <p class="photo-caption">${captions[i] || 'Love'}</p>
             </div>
         `).join('');
