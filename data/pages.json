@@ -76,5 +76,29 @@
       "/uploads/tul-1770281535924-706171916.png"
     ],
     "createdAt": "2026-02-05T08:52:15.993Z"
+  },
+  "test2": {
+    "slug": "test2",
+    "images": [
+      "/uploads/test2-1770294551615-532426120.png",
+      "/uploads/test2-1770294552085-706402867.png",
+      "/uploads/test2-1770294552500-120430562.png",
+      "/uploads/test2-1770294552659-19378359.png",
+      "/uploads/test2-1770294552799-947809447.png",
+      "/uploads/test2-1770294552919-30480974.png"
+    ],
+    "createdAt": "2026-02-05T12:29:13.169Z"
+  },
+  "skk": {
+    "slug": "skk",
+    "images": [
+      "/uploads/skk-1770295518904-649543731.png",
+      "/uploads/skk-1770295519301-373752288.jpg",
+      "/uploads/skk-1770295519398-709385811.png",
+      "/uploads/skk-1770295519580-208484754.png",
+      "/uploads/skk-1770295519752-175826869.jpg",
+      "/uploads/skk-1770295519810-852938504.png"
+    ],
+    "createdAt": "2026-02-05T12:45:20.187Z"
   }
 }

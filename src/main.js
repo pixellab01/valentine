@@ -139,11 +139,6 @@ function renderCreatePage() {
           </div>
         </div>
 
-        <div class="input-group">
-          <label>YouTube Song/Video (Optional)</label>
-          <input type="url" id="youtube" placeholder="https://youtube.com/watch?v=...">
-        </div>
-
         <button type="submit" class="btn">Create My Page ✨</button>
       </form>
     </div>
@@ -175,7 +170,6 @@ function renderCreatePage() {
         btn.disabled = true;
 
         const slug = document.getElementById('slug').value.trim();
-        const youtubeUrl = document.getElementById('youtube').value.trim();
         const files = document.querySelectorAll('.file-input');
 
         // Client-side Slug Regex Check
@@ -188,7 +182,6 @@ function renderCreatePage() {
 
         const formData = new FormData();
         formData.append('slug', slug);
-        formData.append('youtubeUrl', youtubeUrl);
 
         files.forEach(input => {
             if (input.files[0]) {

@@ -107,7 +107,7 @@ app.post('/api/pages', (req, res) => {
             return res.status(500).json({ error: 'File upload failed' });
         }
 
-        const { slug, youtubeUrl } = req.body;
+        const { slug } = req.body;
 
         if (!slug) {
             return res.status(400).json({ error: 'Slug is required' });
@@ -144,7 +144,6 @@ app.post('/api/pages', (req, res) => {
 
         pages[slug] = {
             slug,
-            youtubeUrl,
             images,
             createdAt: new Date().toISOString()
         };
