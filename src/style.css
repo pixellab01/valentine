@@ -124,6 +124,8 @@ input:focus {
     position: relative;
     overflow: hidden;
     transition: var(--transition);
+    width: 100%;
+    /* Fill wrapper */
 }
 
 .image-slot:hover {
@@ -148,6 +150,78 @@ input:focus {
     color: var(--secondary-color);
     font-size: 2rem;
     font-weight: 300;
+}
+
+/* Image Controls */
+.image-slot-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.image-controls {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: -10px;
+    /* Pull up closer */
+    z-index: 10;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 2px;
+    z-index: 10;
+}
+
+.zoom-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color);
+    min-width: 40px;
+    text-align: center;
+}
+
+.ctrl-btn {
+    background: white;
+    border: 1px solid var(--secondary-color);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--primary-color);
+    transition: var(--transition);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.ctrl-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    transform: scale(1.1);
+}
+
+.ctrl-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.delete-btn {
+    color: red;
+    border-color: #ffcccc;
+}
+
+.delete-btn:hover {
+    background: red;
+    border-color: red;
 }
 
 /* Valentine Viewer */
@@ -554,6 +628,7 @@ body.valentine-theme ::-webkit-scrollbar-thumb {
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     transform: rotate(var(--r));
     transition: 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
 }
 
 .polaroid:hover {
@@ -564,10 +639,11 @@ body.valentine-theme ::-webkit-scrollbar-thumb {
 
 .polaroid img {
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 4 / 5;
     object-fit: cover;
     margin-bottom: 15px;
     border: 1px solid #f9f9f9;
+    border-radius: 4px;
 }
 
 .photo-caption {

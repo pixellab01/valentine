@@ -55,7 +55,10 @@ const storage = multer.diskStorage({
     }
 });
 
-const upload = multer({ storage: storage }).array('images', 6);
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 100 * 1024 * 1024 } // 100MB per file
+}).array('images', 6);
 
 // Auth Routes
 
@@ -104,7 +107,11 @@ app.get('/api/pages/:slug', (req, res) => {
 app.post('/api/pages', (req, res) => {
     upload(req, res, (err) => {
         if (err) {
-            return res.status(500).json({ error: 'File upload failed' });
+            console.error('Multer upload error:', err);
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(413).json({ error: 'File too large. Max 100MB per image.' });
+            }
+            return res.status(500).json({ error: 'File upload failed: ' + err.message });
         }
 
         const { slug } = req.body;
@@ -142,9 +149,42 @@ app.post('/api/pages', (req, res) => {
             return res.status(400).json({ error: 'Exactly 6 images are required' });
         }
 
+        let imagePositions = [];
+        try {
+            if (req.body.imagePositions) {
+                imagePositions = JSON.parse(req.body.imagePositions);
+            }
+        } catch (e) {
+            console.error("Error parsing imagePositions", e);
+        }
+
+        // Ensure imagePositions matches images length if not provided or invalid
+        if (!Array.isArray(imagePositions) || imagePositions.length !== images.length) {
+            imagePositions = new Array(images.length).fill('center center');
+        }
+
+        let imageZooms = [];
+        try {
+            if (req.body.imageZooms) {
+                imageZooms = JSON.parse(req.body.imageZooms);
+            }
+        } catch (e) {
+            console.error("Error parsing imageZooms", e);
+        }
+
+        // Ensure imageZooms matches images length if not provided or invalid
+        if (!Array.isArray(imageZooms) || imageZooms.length !== images.length) {
+            imageZooms = new Array(images.length).fill(1);
+        }
+
+        const relationshipYears = req.body.relationshipYears || '1';
+
         pages[slug] = {
             slug,
             images,
+            imagePositions,
+            imageZooms,
+            relationshipYears,
             createdAt: new Date().toISOString()
         };
 

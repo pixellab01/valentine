@@ -111,11 +111,181 @@ function renderLoginPage() {
 
 // Render Creation Page
 function renderCreatePage() {
-    // Basic Auth Check
-    if (!localStorage.getItem('user_email')) {
-        navigate('/');
-        return;
+    // State for image positions and files
+    // We need to keep track of files and their positions manually since we're adding reordering
+    let imageState = Array(6).fill(null).map(() => ({ file: null, preview: '', position: '50% 50%', zoom: 1 }));
+
+    function renderImageGrid() {
+        const grid = document.getElementById('image-grid');
+        if (!grid) return;
+
+        grid.innerHTML = imageState.map((item, i) => `
+          <div class="image-slot-wrapper" data-index="${i}">
+              <div class="image-slot" data-has-preview="${item.preview ? 'true' : 'false'}">
+                ${item.preview ? `<img src="${item.preview}" style="object-position: ${item.position}; transform: scale(${item.zoom})" draggable="false">` : '<span class="placeholder">+</span>'}
+                <input type="file" accept="image/*" class="file-input" ${!item.preview ? '' : 'style="display:none"'} data-index="${i}">
+              </div>
+              ${item.preview ? `<div class="zoom-controls">
+                  <button type="button" class="ctrl-btn zoom-out-btn" title="Zoom Out">−</button>
+                  <span class="zoom-label">${Math.round(item.zoom * 100)}%</span>
+                  <button type="button" class="ctrl-btn zoom-in-btn" title="Zoom In">+</button>
+              </div>` : ''}
+              <div class="image-controls" ${!item.preview ? 'style="display:none"' : ''}>
+                  <button type="button" class="ctrl-btn move-left" ${i === 0 ? 'disabled' : ''} title="Move Left">←</button>
+                  <button type="button" class="ctrl-btn move-right" ${i === 5 ? 'disabled' : ''} title="Move Right">→</button>
+                  <button type="button" class="ctrl-btn delete-btn" title="Remove">×</button>
+              </div>
+          </div>
+        `).join('');
+
+        // Re-attach listeners
+        grid.querySelectorAll('.file-input').forEach(input => {
+            input.addEventListener('change', (e) => handleFileSelect(e, parseInt(input.dataset.index)));
+        });
+
+        // Make empty slots clickable to trigger the hidden file input
+        grid.querySelectorAll('.image-slot').forEach(slot => {
+            if (slot.dataset.hasPreview === 'true') return; // skip slots with images
+            slot.addEventListener('click', (e) => {
+                if (e.target.tagName === 'INPUT') return;
+                const input = slot.querySelector('.file-input');
+                if (input) input.click();
+            });
+        });
+
+        // Drag-to-reposition on image slots that have images
+        grid.querySelectorAll('.image-slot[data-has-preview="true"]').forEach(slot => {
+            const wrapper = slot.closest('.image-slot-wrapper');
+            const idx = parseInt(wrapper.dataset.index);
+            const img = slot.querySelector('img');
+            if (!img) return;
+
+            let isDragging = false;
+            let startX, startY, startPosX, startPosY;
+
+            const parsePosition = (pos) => {
+                const parts = pos.split(' ');
+                return {
+                    x: parseFloat(parts[0]) || 50,
+                    y: parseFloat(parts[1]) || 50
+                };
+            };
+
+            const onStart = (clientX, clientY) => {
+                isDragging = true;
+                startX = clientX;
+                startY = clientY;
+                const pos = parsePosition(imageState[idx].position);
+                startPosX = pos.x;
+                startPosY = pos.y;
+                slot.style.cursor = 'grabbing';
+            };
+
+            const onMove = (clientX, clientY) => {
+                if (!isDragging) return;
+                const rect = slot.getBoundingClientRect();
+                const dx = ((clientX - startX) / rect.width) * 100;
+                const dy = ((clientY - startY) / rect.height) * 100;
+                // Invert: dragging right moves object-position left (shows right side)
+                const newX = Math.max(0, Math.min(100, startPosX - dx));
+                const newY = Math.max(0, Math.min(100, startPosY - dy));
+                const newPos = `${newX.toFixed(1)}% ${newY.toFixed(1)}%`;
+                imageState[idx].position = newPos;
+                img.style.objectPosition = newPos;
+            };
+
+            const onEnd = () => {
+                isDragging = false;
+                slot.style.cursor = 'grab';
+            };
+
+            // Mouse events
+            slot.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(e.clientX, e.clientY); });
+            document.addEventListener('mousemove', (e) => { onMove(e.clientX, e.clientY); });
+            document.addEventListener('mouseup', onEnd);
+
+            // Touch events
+            slot.addEventListener('touchstart', (e) => { const t = e.touches[0]; onStart(t.clientX, t.clientY); }, { passive: true });
+            document.addEventListener('touchmove', (e) => { const t = e.touches[0]; onMove(t.clientX, t.clientY); });
+            document.addEventListener('touchend', onEnd);
+
+            slot.style.cursor = 'grab';
+        });
+
+        grid.querySelectorAll('.move-left').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.image-slot-wrapper').dataset.index);
+                if (idx > 0) swapImages(idx, idx - 1);
+            });
+        });
+
+        grid.querySelectorAll('.move-right').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.image-slot-wrapper').dataset.index);
+                if (idx < 5) swapImages(idx, idx + 1);
+            });
+        });
+
+        grid.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.image-slot-wrapper').dataset.index);
+                deleteImage(idx);
+            });
+        });
+
+        // Zoom controls
+        grid.querySelectorAll('.zoom-in-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.image-slot-wrapper').dataset.index);
+                zoomImage(idx, 0.2);
+            });
+        });
+
+        grid.querySelectorAll('.zoom-out-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(e.target.closest('.image-slot-wrapper').dataset.index);
+                zoomImage(idx, -0.2);
+            });
+        });
     }
+
+    function handleFileSelect(e, index) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                imageState[index].file = file;
+                imageState[index].preview = ev.target.result;
+                imageState[index].position = '50% 50%'; // Reset position on new upload
+                imageState[index].zoom = 1; // Reset zoom on new upload
+                renderImageGrid();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function swapImages(idx1, idx2) {
+        const temp = imageState[idx1];
+        imageState[idx1] = imageState[idx2];
+        imageState[idx2] = temp;
+        renderImageGrid();
+    }
+
+    function deleteImage(index) {
+        imageState[index] = { file: null, preview: '', position: '50% 50%', zoom: 1 };
+        renderImageGrid();
+    }
+
+    function zoomImage(index, delta) {
+        const newZoom = Math.round((imageState[index].zoom + delta) * 10) / 10;
+        imageState[index].zoom = Math.max(0.5, Math.min(3, newZoom)); // Clamp between 0.5x and 3x
+        // Live update without full re-render
+        const img = document.querySelector(`.image-slot-wrapper[data-index="${index}"] .image-slot img`);
+        const label = document.querySelector(`.image-slot-wrapper[data-index="${index}"] .zoom-label`);
+        if (img) img.style.transform = `scale(${imageState[index].zoom})`;
+        if (label) label.textContent = `${Math.round(imageState[index].zoom * 100)}%`;
+    }
+
     app.innerHTML = `
     <div class="container">
       <h1>Valentine Page Builder 💖</h1>
@@ -127,15 +297,9 @@ function renderCreatePage() {
 
         <div class="input-group">
           <label>Upload 6 Sweet Memories</label>
+          <p class="hint">Upload images, drag to reposition, use arrows to reorder, and +/− to zoom.</p>
           <div class="image-grid" id="image-grid">
-            <!-- 6 Upload Slots -->
-            ${Array(6).fill(0).map((_, i) => `
-              <label class="image-slot" data-index="${i}">
-                <span class="placeholder">+</span>
-                <input type="file" accept="image/*" class="file-input" required>
-                <img src="" style="display:none">
-              </label>
-            `).join('')}
+             <!-- Rendered via JS -->
           </div>
         </div>
 
@@ -144,33 +308,23 @@ function renderCreatePage() {
     </div>
   `;
 
-    // Previews
-    document.querySelectorAll('.file-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = e.target.parentElement.querySelector('img');
-                    const span = e.target.parentElement.querySelector('.placeholder');
-                    img.src = ev.target.result;
-                    img.style.display = 'block';
-                    span.style.display = 'none';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    });
+    renderImageGrid();
 
     // Handle Submit
     document.getElementById('create-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const btn = e.target.querySelector('button');
-        btn.textContent = 'Creating... 💖';
+        const btn = e.target.querySelector('button[type="submit"]');
+
+        // Validate
+        if (imageState.some(img => !img.file)) {
+            alert("Please upload all 6 images!");
+            return;
+        }
+
+        btn.textContent = 'Creating... 💖 (Please Wait)';
         btn.disabled = true;
 
         const slug = document.getElementById('slug').value.trim();
-        const files = document.querySelectorAll('.file-input');
 
         // Client-side Slug Regex Check
         if (!/^[a-z0-9-]+$/.test(slug)) {
@@ -183,11 +337,16 @@ function renderCreatePage() {
         const formData = new FormData();
         formData.append('slug', slug);
 
-        files.forEach(input => {
-            if (input.files[0]) {
-                formData.append('images', input.files[0]);
-            }
+        // Append images, positions, and zooms
+        const positions = [];
+        const zooms = [];
+        imageState.forEach(item => {
+            formData.append('images', item.file);
+            positions.push(item.position);
+            zooms.push(item.zoom);
         });
+        formData.append('imagePositions', JSON.stringify(positions));
+        formData.append('imageZooms', JSON.stringify(zooms));
 
         try {
             const res = await fetch(`${API_BASE_URL}/api/pages`, {
@@ -195,18 +354,28 @@ function renderCreatePage() {
                 body: formData
             });
 
-            const data = await res.json();
-
+            // Improved Error Handling
             if (res.ok) {
+                const data = await res.json();
                 navigate(`/v1/${data.slug}`);
             } else {
-                alert(data.error || 'Something went wrong');
+                let errorMsg = 'Something went wrong';
+                try {
+                    const errorText = await res.text();
+                    const errorJson = JSON.parse(errorText);
+                    errorMsg = errorJson.error || errorMsg;
+                } catch (parseErr) {
+                    console.error("Failed to parse error response", parseErr);
+                }
+
+                alert(`Upload Failed: ${errorMsg}`);
+                console.error('Upload failed response:', res.status, errorMsg);
                 btn.textContent = 'Create My Page ✨';
                 btn.disabled = false;
             }
         } catch (err) {
-            console.error(err);
-            alert('Network error');
+            console.error('Network or logic error during create:', err);
+            alert(`Network error: ${err.message}. Check console.`);
             btn.textContent = 'Create My Page ✨';
             btn.disabled = false;
         }
@@ -227,43 +396,27 @@ async function renderValentinePage(slug) {
 
         // 1. Prepare Gallery HTML (Gift 3)
         // We expect up to 6 images. If fewer, we might need to handle empty slots or loop.
-        const captions = ["Sweet Hello", "True Smile", "Perfect Day", "Only Us", "Memories", "Forever"];
+        const captions = ["I", "Love", "You", "Forever", "And", "Ever"];
         const rotations = ["-3deg", "2deg", "-4deg", "3deg", "-4deg", "3deg"];
+
+        // Default positions and zooms if old data
+        const positions = data.imagePositions || Array(data.images.length).fill('center center');
+        const zooms = data.imageZooms || Array(data.images.length).fill(1);
 
         const galleryHtml = data.images.map((img, i) => `
             <div class="polaroid" style="--r:${rotations[i % rotations.length]}">
-                <img src="${API_BASE_URL}${img}" alt="Memory ${i + 1}">
+                <img src="${API_BASE_URL}${img}" alt="Memory ${i + 1}" style="object-position: ${positions[i] || 'center center'}; transform: scale(${zooms[i] || 1})">
                 <p class="photo-caption">${captions[i] || 'Love'}</p>
             </div>
         `).join('');
 
-        // 2. Prepare Video HTML (Final Page)
-        let videoContent = '';
-        let videoId = '';
-
-        if (data.youtubeUrl) {
-            try {
-                const url = new URL(data.youtubeUrl);
-                if (url.hostname.includes('youtube.com')) {
-                    videoId = url.searchParams.get('v');
-                } else if (url.hostname.includes('youtu.be')) {
-                    videoId = url.pathname.slice(1);
-                }
-            } catch (e) { }
-        }
-
-        if (videoId) {
-            videoContent = `
-                <iframe width="350" height="500" src="https://www.youtube.com/embed/${videoId}?autoplay=1&controls=0&loop=1&playlist=${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);"></iframe>
-            `;
-        } else {
-            videoContent = `
-               <video width="350" height="500" controls autoplay loop muted style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
-                  <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
-                  Your browser does not support the video tag.
-               </video>
-             `;
-        }
+        // 2. Prepare Video HTML (Final Page) - local video, plays on "Finally" click
+        const videoContent = `
+            <video id="finalVideo" width="350" height="500" controls loop playsinline preload="auto" style="border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); object-fit: cover;">
+                <source src="/videoplayback.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
 
 
         // 3. Render Full Template
@@ -289,7 +442,7 @@ async function renderValentinePage(slug) {
                     <!-- PAGE 2: HAPPY PROPOSE DAY -->
                     <div id="pageProposeDay" class="valentine-page">
                         <img class="main-gif" src="https://media.tenor.com/Zrr4L_Wd4JkAAAAi/bubu-rub-bubu-love-dudu.gif">
-                        <h1 style="color: #4a0e1c;">Happy Valentine Baby! 💍</h1>
+                        <h1 style="color: #4a0e1c;">Happy Valentine's Day Baby! 💍</h1>
                         <p class="romantic-text">
                             Every second with you is a celebration. You are the spark that makes my world so much brighter!
                         </p>
@@ -318,7 +471,7 @@ async function renderValentinePage(slug) {
 
                     <!-- PAGE: GALLERY -->
                     <div id="pageGallery" class="valentine-page">
-                        <h1>How we have been through these 6 years 😂🙈</h1>
+                        <h1>These memories remind me that loving you is my favorite story.</h1>
                         <div class="gallery-grid">
                             ${galleryHtml}
                         </div>
@@ -329,14 +482,14 @@ async function renderValentinePage(slug) {
                     <div id="pageLetter" class="valentine-page">
                         <h1>A Letter For You 🥺</h1>
                         <div class="letter-paper">
-                             My Dear♥️,<br><br>
-                            You have a beautifully irresistible way of claiming my heart,
-                            Even when you test my patience… I only fall deeper 😌
-                            You are my calm, my chaos, and my sweetest habit,
-                            The one presence my soul keeps reaching for, again and again.
-                            For in every prayer I whisper, your name already lives within it…
-                            And every wish I make quietly finds its way back to you ❤️
-                            No matter what happens, my heart will always choose you.
+                             My Valentine ♥️,<br><br>
+                            From the moment you came into my life,
+                            everything feels a little brighter and a lot more beautiful.
+                            The time we spend together has turned into my favorite memories, 
+                            and each one reminds me how special you truly are.
+                            Your smile, your kindness, and the way you understand me make my heart feel safe and full of love. 
+                            I don’t just admire you  I genuinely cherish you.
+                            This Valentine’s Day, I just want you to know that my feelings are real, my intentions are pure, and my heart chooses you today and always.
                              <br><br>
                             Forever yours. ❤️
                         </div>
@@ -430,13 +583,19 @@ function initializeValentineScripts() {
         if (noClicks >= 4) { noBtn.style.opacity = "0"; noBtn.style.pointerEvents = "none"; }
     });
 
-    // Final Transition
+    // Final Transition - plays local video on click
     document.getElementById('finalBtn')?.addEventListener('click', () => {
         const burst = document.getElementById('burst');
         burst.style.display = 'block';
         burst.animate([{ width: '0', height: '0', opacity: 1 }, { width: '300vw', height: '300vw', opacity: 1 }], { duration: 1000, easing: 'ease-in-out', fill: 'forwards' });
         setTimeout(() => {
             nextPage('pageFinal');
+            // Start playing video only when Final page is shown
+            const video = document.getElementById('finalVideo');
+            if (video) {
+                video.currentTime = 0;
+                video.play().catch(err => console.log('Video autoplay blocked:', err));
+            }
             burst.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1000, fill: 'forwards' });
             setTimeout(() => burst.style.display = 'none', 1000);
         }, 900);
@@ -464,7 +623,7 @@ function initializeValentineScripts() {
     // Quiz
     const questions = [
         { q: "Who is the absolute 'Boss' in this relationship 😌?", a: ["Obviously You", "Me", "My Mom"], correct: 0 },
-        { q: "What fights a lot in this relationship 😒?", a: ["Always You", "No One", "Me"], correct: 2 },
+        { q: "Who fights a lot in this relationship 😒?", a: ["Always You", "No One", "Me"], correct: 2 },
         { q: "Where do I plan to spend the rest of my life 🥺?", a: ["Paris", "In Your Heart", "On Mars"], correct: 1 }
     ];
     let currentQ = 0;
@@ -486,10 +645,24 @@ function initializeValentineScripts() {
 
     function checkAnswer(index) {
         const feedback = document.getElementById('quiz-feedback');
+        const buttons = document.querySelectorAll('.quiz-option');
         if (index === questions[currentQ].correct) {
+            // Highlight correct answer green
+            buttons[index].style.background = '#2ecc71';
+            buttons[index].style.color = '#fff';
             feedback.innerText = "Correct! You're so smart! 😍";
             setTimeout(() => { currentQ++; feedback.innerText = ""; renderQuiz(); }, 1000);
-        } else { feedback.innerText = "Ooho , please try again. 😜"; }
+        } else {
+            // Highlight wrong answer red only
+            buttons[index].style.background = '#e74c3c';
+            buttons[index].style.color = '#fff';
+            feedback.innerText = "Ooho , please try again. 😜";
+            // Reset color after a moment
+            setTimeout(() => {
+                buttons[index].style.background = '';
+                buttons[index].style.color = '';
+            }, 800);
+        }
     }
     renderQuiz();
 
